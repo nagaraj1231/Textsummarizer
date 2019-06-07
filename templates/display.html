@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" /><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<style type="text/css">.btn-group-vertical>.btn-group:after, .btn-group-vertical>.btn-group:before, .btn-toolbar:after, .btn-toolbar:before, .clearfix:after, .clearfix:before, .container-fluid:after, .container-fluid:before, .container:after, .container:before, .dl-horizontal dd:after, .dl-horizontal dd:before, .form-horizontal .form-group:after, .form-horizontal .form-group:before, .modal-footer:after, .modal-footer:before, .modal-header:after, .modal-header:before, .nav:after, .nav:before, .navbar-collapse:after, .navbar-collapse:before, .navbar-header:after, .navbar-header:before, .navbar:after, .navbar:before, .pager:after, .pager:before, .panel-body:after, .panel-body:before, .row:after, .row:before {
+    display: table;
+    content: " ";
+}
+.btn-group-vertical>.btn-group:after, .btn-toolbar:after, .clearfix:after, .container-fluid:after, .container:after, .dl-horizontal dd:after, .form-horizontal .form-group:after, .modal-footer:after, .modal-header:after, .nav:after, .navbar-collapse:after, .navbar-header:after, .navbar:after, .pager:after, .panel-body:after, .row:after {
+    clear: both;
+}
+container:before{
+clear: both!important;
+display: table !important;
+    content: " "!important;
+}
+:after, :before {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+div {
+    display: block;
+}
+	</style>
+</head>
+<body>
+<p style="text-align:center; ">sample code here</p>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+<form style="text-align:center; ">
+    <textarea rows="10" cols="50" name="summary_text"></textarea><br>
+    <button class="btn btn-default">Submit</button>
+</form>
+            </div>
+    </div>
+    <br>
+    <div class="col-md-12" style="text-align:center;" id="abstract">
+    </div>
+</div>
+
+<script type="text/javascript">
+    $('form').on('submit',function(event){
+    event.preventDefault();
+        $.ajax({
+        type: "POST",
+        url:"https://mlsummarizer.herokuapp.com/summarizer_api/v1/summarize_code",
+        data:{"summary_text":$('textarea[name="summary_text"]').val()},
+        success:function(response)
+        {
+                $('#abstract').html('<p> Summary </p><textarea rows="10" cols="50"  style="background:#f9f9f9;" >'+response.abstract+'</textarea>')
+
+
+        }
+        })
+    })
+
+</script>
+</body>
+</html>
