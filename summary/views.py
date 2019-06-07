@@ -43,7 +43,7 @@ class Summarizer(ViewSet):
                             sent_score[sentence] = freq_words_table[word]
 
 
-        summary_sentences = heapq.nlargest(7,sent_score,key=sent_score.get)
+        summary_sentences = heapq.nlargest(1,sent_score,key=sent_score.get)
         summary = ''.join(summary_sentences)
         return Response({'abstract':summary},HTTP_200_OK)
 
