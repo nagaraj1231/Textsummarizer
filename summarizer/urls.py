@@ -19,6 +19,6 @@ from django.conf.urls import url,include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    url(r'summarizer_api/v1/', include('summaryApp.urls'), name="summary_app")
+    url(r'summarizer_api/v1/', include('summary.urls'), name="summary_app")
 
 ]
