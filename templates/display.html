@@ -52,7 +52,7 @@ div {
     event.preventDefault();
         $.ajax({
         type: "POST",
-        url:"http://127.0.0.1:8000/summarizer_api/v1/summarize_code",
+        url:"http://159.89.169.101:8000/summarizer_api/v1/summarize_code",
         data:{"summary_text":$('textarea[name="summary_text"]').val()},
         success:function(response)
         {
