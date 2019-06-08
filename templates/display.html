@@ -39,6 +39,10 @@ div {
             <input type="radio" name="ml_type" value="nltk" checked> Using NLTK Library
             <input type="radio" name="ml_type" value="numpy"> Using Numpy Library
         </div>
+        <div class="col-md-12" style="text-align:center; ">
+            Number of Lines TO Extract
+            <input type="text" name="no_lines" value="">
+        </div>
         <div class="col-md-12">
             <form style="text-align:center; ">
                 <textarea rows="10" cols="50" name="summary_text"></textarea><br>
@@ -67,7 +71,8 @@ div {
         $.ajax({
         type: "POST",
         url: url,
-        data:{"summary_text":$('textarea[name="summary_text"]').val()},
+        data:{"summary_text":$('textarea[name="summary_text"]').val(),
+        "no_lines":$('input[name="no_lines"]').val()},
         success:function(response)
         {
                 $('#abstract').html('<p> Summary </p><textarea rows="10" cols="50"  style="background:#f9f9f9;" >'+response.abstract+'</textarea>')

@@ -22,6 +22,7 @@ class Summarizer(ViewSet):
 
     def summarize_code(self,request):
         self.text = request.POST['summary_text']
+        extraction = request.POST['no_lines']
         stop_words = set(stopwords.words("english"))
         freq_words_table = dict()
         for word in word_tokenize(text=self.text):
@@ -47,7 +48,7 @@ class Summarizer(ViewSet):
                             sent_score[sentence] = freq_words_table[word]
 
 
-        summary_sentences = heapq.nlargest(8,sent_score,key=sent_score.get)
+        summary_sentences = heapq.nlargest(extraction,sent_score,key=sent_score.get)
         summary = ''.join(summary_sentences)
         return Response({'abstract':summary},HTTP_200_OK)
 
@@ -60,6 +61,7 @@ class Summarizer(ViewSet):
     def generate_summary(self,request):
 
         self.input_paragraph = request.POST['summary_text']
+        extraction = request.POST['no_lines']
         # Get the sopwords in English language          ---- M K N
         self.stop_words = stopwords.words("english")
 
@@ -74,8 +76,11 @@ class Summarizer(ViewSet):
         # assign score for the sentence                 ---- M K N
         rank_sentence = sorted(((total_score[i],s) for i,s in enumerate(self.sentence)),reverse=True)
         # rank_sentence = sorted(list(map(lambda x,y: (total_score[x],y) ,list(l for l in range(len(self.sentence))),self.sentence)))
+        summarized_text = list()
+        for i in range(int(extraction)):
+            summarized_text.append(" ".join(rank_sentence[i][1]))
 
-        summarized_text = ". ".join(list(map(lambda g: " ".join(g[1]),rank_sentence)))
+        # summarized_text = ". ".join(list(map(lambda g: " ".join(g[1]),rank_sentence)))
         return Response({'abstract': summarized_text}, HTTP_200_OK)
 
     def similarity_matrix(self):
