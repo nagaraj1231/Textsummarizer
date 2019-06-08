@@ -1,19 +1,23 @@
 from django.shortcuts import render
 from pathlib import Path
 import nltk
+from .magic import methods
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk.cluster.util import cosine_distance
+import networkx as nx
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
+import numpy as np
 import heapq
-
 
 
 class Summarizer(ViewSet):
 
     def __init__(self):
         self.text = ''
+        self.input_paragraph = ''
         pass
 
     def summarize_code(self,request):
@@ -47,7 +51,68 @@ class Summarizer(ViewSet):
         summary = ''.join(summary_sentences)
         return Response({'abstract':summary},HTTP_200_OK)
 
-    def download_dependencies(self,request):
+    def second_summarizer(self):
+        sentences = self.input_paragraph.split(". ")
+        article = list(map(lambda u: u.replace("[^a-zA-Z]"," ").split(" "),sentences))
+        article.pop()
+        return article
+
+    def generate_summary(self,request):
+
+        self.input_paragraph = request.POST['summary_text']
+        # Get the sopwords in English language          ---- M K N
+        self.stop_words = stopwords.words("english")
+
+        self.sentence = self.second_summarizer()
+        #  Generate similarity matrix                   ----- M K N
+        simi_matrix = self.similarity_matrix()
+
+        # Generate similarity matrix from the graph using numpy     ---- M K N
+        similar_matrix_graph = nx.from_numpy_array(simi_matrix)
+        # Generate rank for the matrix                  ---- M K N
+        total_score = nx.pagerank(similar_matrix_graph)
+        # assign score for the sentence                 ---- M K N
+        rank_sentence = sorted(((total_score[i],s) for i,s in enumerate(self.sentence)),reverse=True)
+        # rank_sentence = sorted(list(map(lambda x,y: (total_score[x],y) ,list(l for l in range(len(self.sentence))),self.sentence)))
+
+        summarized_text = ". ".join(list(map(lambda g: " ".join(g[1]),rank_sentence)))
+        return Response({'abstract': summarized_text}, HTTP_200_OK)
+
+    def similarity_matrix(self):
+        similarity = np.zeros(shape=(len(self.sentence),len(self.sentence)))
+        for x in range(len(self.sentence)):
+            for y in range(len(self.sentence)):
+                if x == y:
+                    continue
+                similarity[x][y] = self.similar_sentence(sent1=self.sentence[x],sent2=self.sentence[y])
+
+        return similarity
+
+    def similar_sentence(self,sent1,sent2):
+        if self.stop_words is None:
+            self.stop_words = list()
+
+        sent1 = list(map(lambda d: d.lower(),sent1))
+        sent2 = list(map(lambda m: m.lower(),sent2))
+
+        total_sentence = list(set(sent1+sent2))
+
+        vect1 = [0] * len(total_sentence)
+        vect2 = [0] * len(total_sentence)
+
+        for e in sent1:
+            if e in self.stop_words:
+                continue
+            vect1[total_sentence.index(e)] += 1
+
+        for m in sent2:
+            if m in self.stop_words:
+                continue
+            vect2[total_sentence.index(m)] += 1
+
+        return 1 - cosine_distance(vect1,vect2)
+
+    def download_dependencies(self):
         import nltk
         nltk.download("stopwords")
         nltk.download("punkt")

@@ -35,12 +35,16 @@ div {
 <p style="text-align:center; ">sample code here</p>
 <div class="container">
     <div class="row">
+        <div class="col-md-12" style="text-align:center; ">
+            <input type="radio" name="ml_type" value="nltk" checked> Using NLTK Library
+            <input type="radio" name="ml_type" value="numpy"> Using Numpy Library
+        </div>
         <div class="col-md-12">
-<form style="text-align:center; ">
-    <textarea rows="10" cols="50" name="summary_text"></textarea><br>
-    <button class="btn btn-default">Submit</button>
-</form>
-            </div>
+            <form style="text-align:center; ">
+                <textarea rows="10" cols="50" name="summary_text"></textarea><br>
+                <button class="btn btn-default">Submit</button>
+            </form>
+        </div>
     </div>
     <br>
     <div class="col-md-12" style="text-align:center;" id="abstract">
@@ -49,10 +53,20 @@ div {
 
 <script type="text/javascript">
     $('form').on('submit',function(event){
+    var ml_type = $('input[name="ml_type"]:checked').val();
+    var url = window.location.protocol +"://"+ window.location.host +"/summarizer_api/v1/"
+    if(ml_type == "nltk")
+    {
+        url += "summarize_code";
+    }
+    else
+    {
+        url += "generate_summary";
+    }
     event.preventDefault();
         $.ajax({
         type: "POST",
-        url:"http://159.89.169.101:8000/summarizer_api/v1/summarize_code",
+        url: url,
         data:{"summary_text":$('textarea[name="summary_text"]').val()},
         success:function(response)
         {
