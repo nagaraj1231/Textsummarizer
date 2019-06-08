@@ -22,7 +22,7 @@ class Summarizer(ViewSet):
 
     def summarize_code(self,request):
         self.text = request.POST['summary_text']
-        extraction = request.POST['no_lines']
+        extraction = request.POST['no_lines'] if request.POST['no_lines'] is not '' else 4
         stop_words = set(stopwords.words("english"))
         freq_words_table = dict()
         for word in word_tokenize(text=self.text):
@@ -48,7 +48,7 @@ class Summarizer(ViewSet):
                             sent_score[sentence] = freq_words_table[word]
 
 
-        summary_sentences = heapq.nlargest(extraction,sent_score,key=sent_score.get)
+        summary_sentences = heapq.nlargest(int(extraction),sent_score,key=sent_score.get)
         summary = ''.join(summary_sentences)
         return Response({'abstract':summary},HTTP_200_OK)
 
@@ -61,7 +61,7 @@ class Summarizer(ViewSet):
     def generate_summary(self,request):
 
         self.input_paragraph = request.POST['summary_text']
-        extraction = request.POST['no_lines']
+        extraction = request.POST['no_lines'] if request.POST['no_lines'] is not '' else 4
         # Get the sopwords in English language          ---- M K N
         self.stop_words = stopwords.words("english")
 
