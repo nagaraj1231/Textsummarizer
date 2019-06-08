@@ -23,6 +23,7 @@ class Summarizer(ViewSet):
     def summarize_code(self,request):
         self.text = request.POST['summary_text']
         extraction = request.POST['no_lines'] if request.POST['no_lines'] is not '' else 4
+        print(extraction)
         stop_words = set(stopwords.words("english"))
         freq_words_table = dict()
         for word in word_tokenize(text=self.text):
@@ -62,6 +63,7 @@ class Summarizer(ViewSet):
 
         self.input_paragraph = request.POST['summary_text']
         extraction = request.POST['no_lines'] if request.POST['no_lines'] is not '' else 4
+        print(extraction)
         # Get the sopwords in English language          ---- M K N
         self.stop_words = stopwords.words("english")
 
