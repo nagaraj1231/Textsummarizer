@@ -10,7 +10,9 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 import numpy as np
-import heapq
+import heapq , csv, os, pandas as pd
+from pathlib import Path
+
 
 
 class Summarizer(ViewSet):
@@ -83,6 +85,8 @@ class Summarizer(ViewSet):
             summarized_text.append(" ".join(rank_sentence[i][1]))
 
         # summarized_text = ". ".join(list(map(lambda g: " ".join(g[1]),rank_sentence)))
+        sd = Sentiment_analysis()
+        sd.prepare_dataset(" ".join(summarized_text))
         return Response({'abstract': summarized_text}, HTTP_200_OK)
 
     def similarity_matrix(self):
@@ -124,3 +128,42 @@ class Summarizer(ViewSet):
         nltk.download("stopwords")
         nltk.download("punkt")
 
+class Sentiment_analysis(ViewSet):
+    def __int__(self):
+        super().__init__()
+
+    def prepare_dataset(self,summarized_text):
+        upload_path = str(Path('./media/dataset').resolve())
+        upload_file = str(Path('./media/dataset/summary.tsv').resolve())
+        if not os.path.isdir(upload_path):
+            os.mkdir(upload_path)
+
+        if os.path.exists(upload_file) and os.path.isfile(upload_file):
+            with open(upload_file, "r") as tsvfile:
+                tsvread = csv.reader(tsvfile,delimiter="\t")
+                existing_bytes = list(map(lambda c: c,tsvread))
+                print(existing_bytes)
+                tsvfile.close()
+
+        try:
+            with open(upload_file, "wt") as tsvfile:
+                tsv = csv.writer(tsvfile, delimiter="\t")
+                y = 0
+                for k, row in enumerate(existing_bytes):
+                    y = row[0][1]
+                    print(row)
+                    tsv.writerow([row[0][0],row[0][1]])
+                    # tsv.writerow([row[0][0],row[0][1]])
+                y += '1'
+                tsv.writerow(["ID", y])
+                tsv.writerow(["Text", summarized_text])
+                tsvfile.close()
+
+            pass
+        except NameError:
+            print("not found")
+            with open(upload_file, "wt") as tsvfile:
+                tsv = csv.writer(tsvfile, delimiter="\t")
+                tsv.writerow(["ID","1"])
+                tsv.writerow(["Text",summarized_text])
+                tsvfile.close()
