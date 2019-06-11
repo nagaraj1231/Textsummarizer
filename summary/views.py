@@ -10,7 +10,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 import numpy as np
-import heapq , csv, os, pandas as pd
+import heapq , csv, os, pandas as pd, operator
 from pathlib import Path
 
 
@@ -25,7 +25,6 @@ class Summarizer(ViewSet):
     def summarize_code(self,request):
         self.text = request.POST['summary_text']
         extraction = request.POST['no_lines'] if request.POST['no_lines'] is not '' else 4
-        print(extraction)
         stop_words = set(stopwords.words("english"))
         freq_words_table = dict()
         for word in word_tokenize(text=self.text):
@@ -53,6 +52,9 @@ class Summarizer(ViewSet):
 
         summary_sentences = heapq.nlargest(int(extraction),sent_score,key=sent_score.get)
         summary = ''.join(summary_sentences)
+
+        sd = Sentiment_analysis()
+        sd.prepare_dataset(summary)
         return Response({'abstract':summary},HTTP_200_OK)
 
     def second_summarizer(self):
@@ -65,7 +67,6 @@ class Summarizer(ViewSet):
 
         self.input_paragraph = request.POST['summary_text']
         extraction = request.POST['no_lines'] if request.POST['no_lines'] is not '' else 4
-        print(extraction)
         # Get the sopwords in English language          ---- M K N
         self.stop_words = stopwords.words("english")
 
@@ -142,26 +143,20 @@ class Sentiment_analysis(ViewSet):
             with open(upload_file, "r") as tsvfile:
                 tsvread = csv.reader(tsvfile,delimiter="\t")
                 existing_bytes = list(map(lambda c: c,tsvread))
-                print(existing_bytes)
                 tsvfile.close()
 
         try:
             with open(upload_file, "wt") as tsvfile:
                 tsv = csv.writer(tsvfile, delimiter="\t")
-                y = 0
+                y = int(existing_bytes[-2][1]) + 1
+                existing_bytes.append(['ID',y])
+                existing_bytes.append(["Text", summarized_text])
                 for k, row in enumerate(existing_bytes):
-                    y = row[0][1]
-                    print(row)
-                    tsv.writerow([row[0][0],row[0][1]])
-                    # tsv.writerow([row[0][0],row[0][1]])
-                y += '1'
-                tsv.writerow(["ID", y])
-                tsv.writerow(["Text", summarized_text])
+                    tsv.writerow([row[0],row[1]])
                 tsvfile.close()
 
             pass
         except NameError:
-            print("not found")
             with open(upload_file, "wt") as tsvfile:
                 tsv = csv.writer(tsvfile, delimiter="\t")
                 tsv.writerow(["ID","1"])
