@@ -1,18 +1,18 @@
-from django.shortcuts import render
 from pathlib import Path
 import nltk
 from .magic import methods
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.cluster.util import cosine_distance
-import networkx as nx
+import networkx as nx, math as m
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
-import numpy as np
-import heapq , csv, os, pandas as pd, operator
-from pathlib import Path
+from django.conf import settings
+import numpy as np, heapq , csv, os, pandas as pd, operator, logging
 
+logging.basicConfig(format="%(asctime)s : %(levelname): %(message)", level=logging.INFO, filename="summarizer.log",
+                            filemode="a")
 
 
 class Summarizer(ViewSet):
@@ -129,26 +129,28 @@ class Summarizer(ViewSet):
         nltk.download("stopwords")
         nltk.download("punkt")
 
-class Sentiment_analysis(ViewSet):
-    def __int__(self):
+class Sentiment_analysis(Summarizer):
+    def __init__(self):
         super().__init__()
+        self.upload_path = str(Path('.{:s}dataset'.format(settings.MEDIA_URL)).resolve())
+
+        self.upload_file = str(Path('.{:s}dataset/summary.tsv'.format(settings.MEDIA_URL)).resolve())
+
 
     def prepare_dataset(self,summarized_text):
-        upload_path = str(Path('./media/dataset').resolve())
-        upload_file = str(Path('./media/dataset/summary.tsv').resolve())
-        if not os.path.isdir(upload_path):
-            os.mkdir(upload_path)
+        if not os.path.isdir(self.upload_path):
+            os.mkdir(self.upload_path)
 
-        if os.path.exists(upload_file) and os.path.isfile(upload_file):
-            with open(upload_file, "r") as tsvfile:
+        if os.path.exists(self.upload_file) and os.path.isfile(self.upload_file):
+            with open(self.upload_file, "r") as tsvfile:
                 tsvread = csv.reader(tsvfile,delimiter="\t")
                 existing_bytes = list(map(lambda c: c,tsvread))
                 tsvfile.close()
 
         try:
-            with open(upload_file, "wt") as tsvfile:
+            with open(self.upload_file, "wt") as tsvfile:
                 tsv = csv.writer(tsvfile, delimiter="\t")
-                y = int(existing_bytes[-2][1]) + 1
+                y = operator.__add__(int(existing_bytes[-2][1]), 1)
                 existing_bytes.append(['ID',y])
                 existing_bytes.append(["Text", summarized_text])
                 for k, row in enumerate(existing_bytes):
@@ -157,8 +159,20 @@ class Sentiment_analysis(ViewSet):
 
             pass
         except NameError:
-            with open(upload_file, "wt") as tsvfile:
+            with open(self.upload_file, "wt") as tsvfile:
                 tsv = csv.writer(tsvfile, delimiter="\t")
                 tsv.writerow(["ID","1"])
                 tsv.writerow(["Text",summarized_text])
                 tsvfile.close()
+
+    def fetch_data_from_dataset(self):
+        with open(self.upload_file, "r") as tsvfile:
+            tsvread = csv.reader(tsvfile, delimiter="\t")
+            existing_bytes = list(map(lambda c: c, tsvread))
+            tsvfile.close()
+
+        for k,row in enumerate(existing_bytes):
+            if m.fmod(k,2) != float(0):
+                print(row)
+
+
