@@ -1,5 +1,5 @@
 decorator==4.4.0
-Django==2.1
+Django==2.2.13
 djangorestframework==3.9.4
 gunicorn==19.9.0
 networkx==2.3
