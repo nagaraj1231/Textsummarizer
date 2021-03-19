@@ -1,6 +1,6 @@
 decorator==4.4.0
 Django==2.1
-djangorestframework==3.9.4
+djangorestframework==3.11.2
 gunicorn==19.9.0
 networkx==2.3
 nltk==3.4.1
