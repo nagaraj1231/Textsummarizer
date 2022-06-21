@@ -4,6 +4,6 @@ djangorestframework==3.9.4
 gunicorn==19.9.0
 networkx==2.3
 nltk==3.4.1
-numpy==1.16.4
+numpy==1.22.0
 pytz==2019.1
 six==1.12.0
